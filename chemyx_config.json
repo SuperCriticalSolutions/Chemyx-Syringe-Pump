@@ -1,0 +1,7 @@
+{
+  "port": "COM3",
+  "baudrate": 38400,
+  "diameter": 28.6,
+  "max_volume": 20.0,
+  "max_rate": 100.0
+}
