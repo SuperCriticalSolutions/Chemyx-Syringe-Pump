@@ -209,12 +209,14 @@ class StepExecutor(QObject):
         """
         self.connection.setUnits('mL/min')
         self.connection.setDiameter(self.config['diameter'])
-        
+
         # Determine mode and volume based on signs
-        if volume < 0:
-            self.connection.setMode(1)  # Infuse mode
+        actual_volume = volume
+        
+        if actual_volume < 0:
+            self.connection.setMode(1)
         else:
-            self.connection.setMode(0)  # Withdraw mode
+            self.connection.setMode(1)
             
         self.connection.setVolume(actual_volume)
         self.connection.setRate(abs(rate))
@@ -222,11 +224,17 @@ class StepExecutor(QObject):
         
         if wait_for_completion and actual_volume > 0:
             # Wait for completion based on volume and rate
-            wait_time = actual_volume / abs(rate) * 60
+
+            wait_time = abs(actual_volume) / abs(rate) * 60
+
+            print(f"wait_time = {wait_time}")
             time.sleep(wait_time + 1)
+
+            print(f"wait_time = {wait_time}")
 
     def _pump_volume(self, volume, rate):
         """Pump a specific volume at given rate"""
+        print(f"Pumping volume at {volume} mL/min")
         self._execute_pump_operation(volume, rate, wait_for_completion=True)
         
     def _pump_time(self, duration, rate):
@@ -237,7 +245,7 @@ class StepExecutor(QObject):
         # Apply rate direction to volume
         if rate < 0:
             volume = -volume
-            
+        print(f"Pumping time at {duration}s")
         self._execute_pump_operation(volume, abs(rate), wait_for_completion=False)
         time.sleep(duration + 1)
         
@@ -1117,14 +1125,22 @@ class MyChemyxGUI(QMainWindow):
             
         try:
             rate = self.jog_rate_spinbox.value()
-            # Use large volume for continuous jogging
-            # Positive volume for withdraw (fill direction = False)
-            # Negative volume for infuse (fill direction = True) 
-            volume = -50 if fill_direction else 50
             
-            # Create a temporary executor to use the unified method
-            executor = StepExecutor([], self.connection, self.config)
-            executor._execute_pump_operation(volume, rate, wait_for_completion=False)
+            # Set up pump for jogging directly
+            self.connection.setUnits('mL/min')
+            self.connection.setDiameter(self.config['diameter'])
+            
+            if fill_direction:
+                # Fill (infuse) - negative direction
+                self.connection.setMode(1)  # Infuse mode
+                self.connection.setVolume(-50)  # Large volume for continuous operation
+            else:
+                # Empty (withdraw) - positive direction  
+                self.connection.setMode(1)  # Withdraw mode
+                self.connection.setVolume(50)  # Large volume for continuous operation
+                
+            self.connection.setRate(rate)
+            self.connection.startPump()
             
         except Exception as e:
             logger.error(f"Jog error: {e}")
