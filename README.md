@@ -1,4 +1,4 @@
-# Chemyx Syringe Pump Controller
+# Chemyx Syringe Pump Controller 
 
 This project is built on top of the original Chemyx Syringe Pump repository from https://github.com/cukelarter/Chemyx-Syringe-Pump.
 
