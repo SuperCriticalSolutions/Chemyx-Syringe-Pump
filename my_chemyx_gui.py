@@ -723,7 +723,7 @@ class MyChemyxGUI(QMainWindow):
         self.jog_rate_spinbox.setValue(5)
         self.jog_rate_spinbox.setSuffix(" mL/min")
         
-        # Set jog buttons to work while pressed
+        # Set jog buttons to work while pres3sed
         self.jog_fill_btn.pressed.connect(lambda: self.start_jog(True))
         self.jog_fill_btn.released.connect(self.stop_jog)
         self.jog_empty_btn.pressed.connect(lambda: self.start_jog(False))
@@ -793,6 +793,10 @@ class MyChemyxGUI(QMainWindow):
         scan_btn = QPushButton("🔍 Scan Ports")
         scan_btn.clicked.connect(self.scan_ports)
         config_layout.addRow("", scan_btn)
+
+        save_config_btn = QPushButton("💾 Save Config")
+        save_config_btn.clicked.connect(self.manual_save_config)
+        config_layout.addRow("", save_config_btn)
         
         layout.addWidget(config_group)
         layout.addStretch()
@@ -845,7 +849,29 @@ class MyChemyxGUI(QMainWindow):
             'max_rate': self.max_rate_edit.value()
         })
         self.save_config()
-        
+
+    def manual_save_config(self):
+        """Manually save configuration from UI with user feedback"""
+        try:
+            # Update config from current UI values
+            self.config.update({
+                'port': self.port_combo.currentText(),
+                'baudrate': int(self.baudrate_combo.currentText()),
+                'diameter': self.diameter_edit.value(),
+                'max_volume': self.max_volume_edit.value(),
+                'max_rate': self.max_rate_edit.value()
+            })
+
+            # Save to file
+            with open(self.config_file, 'w') as f:
+                json.dump(self.config, f, indent=2)
+
+            # Show success message
+            QMessageBox.information(self, "Success", "Configuration saved successfully!")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to save configuration: {str(e)}")
+
     def toggle_connection(self):
         """Toggle pump connection"""
         if not self.connected:
@@ -1243,14 +1269,28 @@ class MyChemyxGUI(QMainWindow):
                 with open(self.config_file, 'r') as f:
                     loaded_config = json.load(f)
                 self.config.update(loaded_config)
-                
-                # Update UI
+
+                # Temporarily disconnect signals to prevent overwriting during UI update
+                self.port_combo.currentTextChanged.disconnect()
+                self.baudrate_combo.currentTextChanged.disconnect()
+                self.diameter_edit.valueChanged.disconnect()
+                self.max_volume_edit.valueChanged.disconnect()
+                self.max_rate_edit.valueChanged.disconnect()
+
+                # Update UI with loaded values
                 self.port_combo.setCurrentText(str(self.config['port']))
                 self.baudrate_combo.setCurrentText(str(self.config['baudrate']))
                 self.diameter_edit.setValue(self.config['diameter'])
                 self.max_volume_edit.setValue(self.config['max_volume'])
                 self.max_rate_edit.setValue(self.config['max_rate'])
-                
+
+                # Reconnect signals
+                self.port_combo.currentTextChanged.connect(self.update_and_save_config)
+                self.baudrate_combo.currentTextChanged.connect(self.update_and_save_config)
+                self.diameter_edit.valueChanged.connect(self.update_and_save_config)
+                self.max_volume_edit.valueChanged.connect(self.update_and_save_config)
+                self.max_rate_edit.valueChanged.connect(self.update_and_save_config)
+
         except Exception as e:
             logger.warning(f"Failed to load config: {e}")
             
