@@ -294,7 +294,7 @@ class MyChemyxGUI(QMainWindow):
         self.config = {
             'port': 'COM4',
             'baudrate': 38400,
-            'diameter': 28.6,
+            'diameter': 12.5,
             'max_volume': 20,
             'max_rate': 100
         }
@@ -771,7 +771,7 @@ class MyChemyxGUI(QMainWindow):
         
         self.diameter_edit = QDoubleSpinBox()
         self.diameter_edit.setRange(0.1, 100.0)
-        self.diameter_edit.setValue(28.6)
+        self.diameter_edit.setValue(12.5)
         self.diameter_edit.setSuffix(" mm")
         
         self.max_volume_edit = QDoubleSpinBox()
