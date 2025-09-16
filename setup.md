@@ -1,4 +1,4 @@
-# Chemyx Syringe Pump Controller Setup Guide
+# Chemyx Syringe Pump Controller Setup Guide.
 
 This guide will walk you through setting up the Chemyx Syringe Pump Controller on Windows so you can run it by double-clicking a desktop shortcut.
 
