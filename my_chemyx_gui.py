@@ -35,7 +35,7 @@ class CachedConnection:
         self.cache = {}
         # Methods that should be cached (parameter-setting methods)
         self.cacheable_methods = {
-            'setUnits', 'setDiameter', 'setVolume', 'setMode', 'setRate', 
+            'setUnits', 'setDiameter', 'setVolume', 'setMode', 'setRate',
             'setDelay', 'setTime', 'setPump'
         }
     
@@ -210,22 +210,16 @@ class StepExecutor(QObject):
         self.connection.setUnits('mL/min')
         self.connection.setDiameter(self.config['diameter'])
 
-        # Determine mode and volume based on signs
-        actual_volume = volume
-        
-        if actual_volume < 0:
-            self.connection.setMode(1)
-        else:
-            self.connection.setMode(1)
-            
-        self.connection.setVolume(actual_volume)
+        # Volume sign determines direction: positive = withdraw, negative = infuse
+        self.connection.setMode(0)
+        self.connection.setVolume(volume)
         self.connection.setRate(abs(rate))
         self.connection.startPump()
         
-        if wait_for_completion and actual_volume > 0:
+        if wait_for_completion and volume != 0:
             # Wait for completion based on volume and rate
 
-            wait_time = abs(actual_volume) / abs(rate) * 60
+            wait_time = abs(volume) / abs(rate) * 60
 
             print(f"wait_time = {wait_time}")
             time.sleep(wait_time + 1)
@@ -1155,16 +1149,14 @@ class MyChemyxGUI(QMainWindow):
             # Set up pump for jogging directly
             self.connection.setUnits('mL/min')
             self.connection.setDiameter(self.config['diameter'])
-            
+            self.connection.setMode(0)
             if fill_direction:
-                # Fill (infuse) - negative direction
-                self.connection.setMode(1)  # Infuse mode
-                self.connection.setVolume(-50)  # Large volume for continuous operation
+                # Fill (infuse) - negative volume
+                self.connection.setVolume(-10)  # Large -ve volume for continuous infusion
             else:
-                # Empty (withdraw) - positive direction  
-                self.connection.setMode(1)  # Withdraw mode
-                self.connection.setVolume(50)  # Large volume for continuous operation
-                
+                # Empty (withdraw) - positive volume
+                self.connection.setVolume(10)  # Large +ve volume for continuous withdrawal
+
             self.connection.setRate(rate)
             self.connection.startPump()
             

@@ -78,21 +78,21 @@ class Connection(object):
             self.ser.open()
             if self.ser.isOpen():
                 if self.verbose:
-                    print("Opened port")
+                    print(" # Pump: Opened port")
                     print(self.ser)
                 self.getPumpStatus()
                 self.ser.flushInput()
                 self.ser.flushOutput()
         except Exception as e:
             if self.verbose:
-                print('Failed to connect to pump')
+                print(' # Pump: Failed to connect to pump')
                 print(e)
             pass
 
     def closeConnection(self):
         self.ser.close()
         if self.verbose:
-            print("Closed connection")
+            print(" # Pump: Closed connection")
 
     def sendCommand(self, command):
         """
@@ -108,7 +108,7 @@ class Connection(object):
         """
         if self.multipump and command[:3]=='set':
             command=self.addPump(command)
-        print(command)
+        print(f" # Pump: sent command '{command}'")
         try:
             arg = bytes(str(command), 'utf8') + b'\r'
             self.ser.write(arg)
@@ -144,7 +144,7 @@ class Connection(object):
 
     def startPump(self, mode=0, multistep=False):
         """
-        Start run of pump. 
+        Start run of pump.
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class Connection(object):
             Mode that pump should start running.
             For single-channel pumps this value should not change.
             Dual-channel pumps have more control over run state.
-            
+
             0: Default, runs all channels available.
             1: For dual channel pumps, runs just pump 1.
             2: For dual channel pumps, runs just pump 2.
@@ -170,7 +170,7 @@ class Connection(object):
 
     def stopPump(self, mode=0):
         """
-        Stop run of pump. 
+        Stop run of pump.
 
         Parameters
         ----------
@@ -178,7 +178,7 @@ class Connection(object):
             Mode that pump should stop running.
             For single-channel pumps this value should not change.
             Dual-channel pumps have more control over run state.
-            
+
             0: Default, stops all channels available.
             1: For dual channel pumps, stops just pump 1.
             2: For dual channel pumps, stops just pump 2.
@@ -192,7 +192,7 @@ class Connection(object):
 
     def pausePump(self, mode=0):
         """
-        Pauses run of pump. 
+        Pauses run of pump.
 
         Parameters
         ----------
@@ -200,7 +200,7 @@ class Connection(object):
             Mode that pump should pause current run.
             For single-channel pumps this value should not change.
             Dual-channel pumps have more control over run state.
-            
+
             0: Default, pauses all channels available.
             1: For dual channel pumps, pauses just pump 1.
             2: For dual channel pumps, pauses just pump 2.
@@ -229,27 +229,27 @@ class Connection(object):
         return response
 
     def setRate(self, rate):
-        if isinstance(rate,list): 
+        if isinstance(rate,list):
             # if list of volumes entered, use multi-step command
-            command = 'set rate '+','.join([str(x) for x in rate]) 
+            command = 'set rate '+','.join([str(x) for x in rate])
         else:
             command = 'set rate ' + str(rate)
         response = self.sendCommand(command)
         return response
 
     def setVolume(self, volume):
-        if isinstance(volume,list): 
+        if isinstance(volume,list):
             # if list of volumes entered, use multi-step command
-            command = 'set volume '+','.join([str(x) for x in volume]) 
+            command = 'set volume '+','.join([str(x) for x in volume])
         else:
             command = 'set volume ' + str(volume)
         response = self.sendCommand(command)
         return response
 
     def setDelay(self, delay):
-        if isinstance(delay,list): 
+        if isinstance(delay,list):
             # if list of volumes entered, use multi-step command
-            command = 'set delay '+','.join([str(x) for x in delay]) 
+            command = 'set delay '+','.join([str(x) for x in delay])
         else:
             command = 'set delay ' + str(delay)
         response = self.sendCommand(command)
@@ -257,6 +257,19 @@ class Connection(object):
 
     def setTime(self, timer):
         command = 'set time ' + str(timer)
+        response = self.sendCommand(command)
+        return response
+
+    def setMode(self, mode):
+        """
+        Sets the pump mode to either infuse (0) or withdraw (1).
+
+        Parameters
+        ----------
+        mode : int
+                0 for Infuse, 1 for Withdraw.
+        """
+        command = 'set mode ' + str(mode)
         response = self.sendCommand(command)
         return response
 

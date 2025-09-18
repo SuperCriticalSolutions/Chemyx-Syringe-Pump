@@ -2,22 +2,15 @@
   {
     "function": "pump_volume",
     "params": {
-      "volume": 1.0,
-      "rate": 50.0
+      "volume": -0.1,
+      "rate": 10.0
     }
   },
   {
     "function": "pump_volume",
     "params": {
-      "volume": -1.0,
-      "rate": 49.0
-    }
-  },
-  {
-    "function": "pump_volume",
-    "params": {
-      "volume": 1.0,
-      "rate": 51.0
+      "volume": 15.0,
+      "rate": 10.0
     }
   }
 ]
