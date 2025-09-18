@@ -221,10 +221,7 @@ class StepExecutor(QObject):
 
             wait_time = abs(volume) / abs(rate) * 60
 
-            print(f"wait_time = {wait_time}")
-            time.sleep(wait_time + 1)
-
-            print(f"wait_time = {wait_time}")
+            time.sleep(wait_time + 0.5)
 
     def _pump_volume(self, volume, rate):
         """Pump a specific volume at given rate"""
